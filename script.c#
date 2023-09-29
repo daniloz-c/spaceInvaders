@@ -1,0 +1,91 @@
+using System;
+using System.Windows.Forms;
+using System.Drawing;
+
+public class SpaceInvaders : Form
+{
+    private System.Windows.Forms.Timer gameTimer; // Especifique explicitamente o namespace System.Windows.Forms.Timer
+    private int playerX, playerY;
+    private int enemyX, enemyY;
+    private int playerSpeed = 5;
+    private int enemySpeed = 3;
+    private bool isGameOver = false;
+
+    public SpaceInvaders()
+    {
+        // Configurar a janela do jogo
+        this.Text = "Space Invaders";
+        this.Size = new Size(800, 600);
+        this.DoubleBuffered = true;
+
+        // Inicializar posições iniciais
+        playerX = this.Width / 2;
+        playerY = this.Height - 50;
+        enemyX = this.Width / 2;
+        enemyY = 50;
+
+        // Configurar o timer do jogo
+        gameTimer = new System.Windows.Forms.Timer(); // Especifique explicitamente o namespace System.Windows.Forms.Timer
+        gameTimer.Interval = 16; // 60 FPS
+        gameTimer.Tick += new EventHandler(Update);
+        gameTimer.Start();
+    }
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        if (!isGameOver)
+        {
+            // Desenhar jogador
+            e.Graphics.FillRectangle(Brushes.Blue, playerX, playerY, 40, 40);
+
+            // Desenhar inimigo
+            e.Graphics.FillRectangle(Brushes.Red, enemyX, enemyY, 40, 40);
+        }
+        else
+        {
+            e.Graphics.DrawString("Game Over!", new Font("Arial", 20), Brushes.White, new PointF(350, 250));
+        }
+    }
+
+    private void Update(object sender, EventArgs e)
+    {
+        if (!isGameOver)
+        {
+            // Mover inimigo
+            enemyY += enemySpeed;
+
+            // Verificar colisão
+            Rectangle playerRect = new Rectangle(playerX, playerY, 40, 40);
+            Rectangle enemyRect = new Rectangle(enemyX, enemyY, 40, 40);
+
+            if (playerRect.IntersectsWith(enemyRect))
+            {
+                isGameOver = true;
+            }
+
+            // Redesenhar a tela
+            this.Invalidate();
+        }
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.KeyCode == Keys.Left && playerX > 0)
+        {
+            playerX -= playerSpeed;
+        }
+        else if (e.KeyCode == Keys.Right && playerX < this.Width - 40)
+        {
+            playerX += playerSpeed;
+        }
+    }
+
+    public static void Main()
+    {
+        Application.EnableVisualStyles(); // Adicione esta linha para aplicar estilos visuais
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new SpaceInvaders());
+    }
+}
