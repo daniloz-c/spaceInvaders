@@ -1,0 +1,130 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    static int playerX, playerY;
+    static int[] enemyX, enemyY;
+    static int playerSpeed = 1;
+    static int enemySpeed = 1;
+    static bool isGameOver = false;
+    static char[,] screen;
+
+    static void Main()
+    {
+        Console.WindowHeight = 20;
+        Console.WindowWidth = 40;
+        Console.BufferHeight = 20;
+        Console.BufferWidth = 40;
+
+        playerX = Console.WindowWidth / 2;
+        playerY = Console.WindowHeight - 1;
+
+        int numEnemies = 7; // Número de inimigos
+        enemyX = new int[numEnemies];
+        enemyY = new int[numEnemies];
+
+        screen = new char[Console.WindowWidth, Console.WindowHeight];
+
+        Thread t = new Thread(MoveEnemies);
+        t.Start();
+
+        while (!isGameOver)
+        {
+            Draw();
+            Input();
+            Logic();
+            Thread.Sleep(70);
+        }
+
+        Console.Clear();
+        Console.WriteLine("Game Over!");
+        Console.ReadKey();
+    }
+
+    static void Draw()
+    {
+        Console.Clear();
+
+        // Limpar a matriz de tela
+        for (int x = 0; x < Console.WindowWidth; x++)
+        {
+            for (int y = 0; y < Console.WindowHeight; y++)
+            {
+                screen[x, y] = ' ';
+            }
+        }
+
+        // Desenhar jogador
+        screen[playerX, playerY] = 'P';
+
+        // Desenhar inimigos
+        for (int i = 0; i < enemyX.Length; i++)
+        {
+            if (enemyX[i] >= 0 && enemyX[i] < Console.WindowWidth && enemyY[i] >= 0 && enemyY[i] < Console.WindowHeight)
+            {
+                screen[enemyX[i], enemyY[i]] = 'E';
+            }
+        }
+
+        // Exibir a matriz de tela
+        for (int y = 0; y < Console.WindowHeight; y++)
+        {
+            for (int x = 0; x < Console.WindowWidth; x++)
+            {
+                Console.SetCursorPosition(x, y);
+                Console.Write(screen[x, y]);
+            }
+        }
+    }
+
+    static void Input()
+    {
+        if (Console.KeyAvailable)
+        {
+            ConsoleKeyInfo key = Console.ReadKey(true);
+            while (Console.KeyAvailable) Console.ReadKey(true); // Limpa o buffer de teclas
+            switch (key.Key)
+            {
+                case ConsoleKey.LeftArrow:
+                    if (playerX > 0)
+                        playerX -= playerSpeed;
+                    break;
+                case ConsoleKey.RightArrow:
+                    if (playerX < Console.WindowWidth - 1)
+                        playerX += playerSpeed;
+                    break;
+            }
+        }
+    }
+
+    static void Logic()
+    {
+        for (int i = 0; i < enemyX.Length; i++)
+        {
+            enemyY[i] += enemySpeed;
+            if (enemyY[i] >= Console.WindowHeight)
+            {
+                enemyX[i] = new Random().Next(0, Console.WindowWidth);
+                enemyY[i] = 0;
+            }
+            if (playerX == enemyX[i] && playerY == enemyY[i])
+            {
+                isGameOver = true;
+            }
+        }
+    }
+
+    static void MoveEnemies()
+    {
+        while (!isGameOver)
+        {
+            // Atualizar a posição dos inimigos
+            for (int i = 0; i < enemyX.Length; i++)
+            {
+                enemyY[i] += enemySpeed;
+            }
+            Thread.Sleep(100); // Espere 0,1 segundo entre os movimentos dos inimigos
+        }
+    }
+}
