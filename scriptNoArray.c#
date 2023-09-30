@@ -1,0 +1,99 @@
+using System;
+using System.Threading;
+
+class Program
+{
+    static int playerX, playerY;
+    static int enemyX, enemyY;
+    static int playerSpeed = 1;
+    static int enemySpeed = 1;
+    static bool isGameOver = false;
+
+    static void Main()
+    {
+        Console.WindowHeight = 20;
+        Console.WindowWidth = 40;
+        Console.BufferHeight = 20;
+        Console.BufferWidth = 40;
+
+        playerX = Console.WindowWidth / 2;
+        playerY = Console.WindowHeight - 1;
+        enemyX = Console.WindowWidth / 2;
+        enemyY = 0;
+
+        Thread t = new Thread(MoveEnemies);
+        t.Start();
+
+        while (!isGameOver)
+        {
+            Draw();
+            Input();
+            Logic();
+            Thread.Sleep(50);
+        }
+
+        Console.Clear();
+        Console.WriteLine("Game Over!");
+        Console.ReadKey();
+    }
+
+    static void Draw()
+    {
+        Console.Clear();
+        if (playerX >= 0 && playerX < Console.WindowWidth && playerY >= 0 && playerY < Console.WindowHeight)
+        {
+            Console.SetCursorPosition(playerX, playerY);
+            Console.Write("P");
+        }
+        if (enemyX >= 0 && enemyX < Console.WindowWidth && enemyY >= 0 && enemyY < Console.WindowHeight)
+        {
+            Console.SetCursorPosition(enemyX, enemyY);
+            Console.Write("E");
+        }
+    }
+
+    static void Input()
+    {
+        if (Console.KeyAvailable)
+        {
+            ConsoleKeyInfo key = Console.ReadKey(true);
+            while (Console.KeyAvailable) Console.ReadKey(true); // Limpa o buffer de teclas
+            switch (key.Key)
+            {
+                case ConsoleKey.LeftArrow:
+                    if (playerX > 0)
+                        playerX -= playerSpeed;
+                    break;
+                case ConsoleKey.RightArrow:
+                    if (playerX < Console.WindowWidth - 1)
+                        playerX += playerSpeed;
+                    break;
+            }
+        }
+    }
+
+    static void Logic()
+    {
+        enemyY += enemySpeed;
+
+        if (enemyY >= Console.WindowHeight)
+        {
+            enemyX = new Random().Next(0, Console.WindowWidth);
+            enemyY = 0;
+        }
+
+        if (playerX == enemyX && playerY == enemyY)
+        {
+            isGameOver = true;
+        }
+    }
+
+    static void MoveEnemies()
+    {
+        while (!isGameOver)
+        {
+            enemyY += enemySpeed;
+            Thread.Sleep(100);
+        }
+    }
+}
