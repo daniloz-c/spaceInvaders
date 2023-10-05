@@ -31,11 +31,6 @@ class Program
         Thread t = new Thread(MoveEnemies);
         t.Start();
 
-        for(int i = 0; i < numEnemies; i++)
-        { 
-            enemyX[i] = (int)(Console.WindowWidth * 0.4) + random.Next(0, (int)(Console.WindowWidth * 0.2)); // Posição centralizada
-        }
-
         while (!isGameOver)
         {
             Draw();
