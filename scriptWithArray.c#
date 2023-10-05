@@ -18,13 +18,22 @@ class Program
         Console.BufferHeight = 20;
         Console.BufferWidth = 40;
 
+
         playerX = Console.WindowWidth / 2;
         playerY = Console.WindowHeight - 1;
+
 
         int numEnemies = 7; // Número de inimigos
         enemyX = new int[numEnemies];
         enemyY = new int[numEnemies];
-        enemySpeed = new int[numEnemies];
+        int[] enemySpeed = new int[numEnemies];
+
+
+        for (int i = 0; i < numEnemies; i++)
+        {
+            enemyX[i] = new Random().Next(0, Console.WindowWidth);
+            enemyY[i] = -i * 5; // Isso fará com que cada inimigo comece 5 unidades acima do anterior
+        }
 
         screen = new char[Console.WindowWidth, Console.WindowHeight];
 
@@ -161,7 +170,7 @@ class Program
 
     static void MoveEnemies()
     {
-        while (!isGameOver) 
+        while (!isGameOver)
         {
             // Atualizar a posição dos inimigos
             for (int i = 0; i < enemyX.Length; i++)
