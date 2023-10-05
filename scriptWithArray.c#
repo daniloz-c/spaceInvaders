@@ -8,6 +8,8 @@ class Program
     static int playerSpeed = 1;
     static bool isGameOver = false;
     static char[,] screen;
+    static int bulletX, bulletY;
+    static bool isBulletActive = false;
 
     static void Main()
     {
@@ -16,22 +18,31 @@ class Program
         Console.BufferHeight = 20;
         Console.BufferWidth = 40;
 
+
         playerX = Console.WindowWidth / 2;
         playerY = Console.WindowHeight - 1;
+
 
         int numEnemies = 7; // Número de inimigos
         enemyX = new int[numEnemies];
         enemyY = new int[numEnemies];
-        enemySpeed = new int[numEnemies];
+        int[] enemySpeed = new int[numEnemies];
 
-        screen = new char[Console.WindowWidth, Console.WindowHeight];   
+
+        for (int i = 0; i < numEnemies; i++)
+        {
+            enemyX[i] = new Random().Next(0, Console.WindowWidth);
+            enemyY[i] = -i * 5; // Isso fará com que cada inimigo comece 5 unidades acima do anterior
+        }
+
+        screen = new char[Console.WindowWidth, Console.WindowHeight];
 
         Thread t = new Thread(MoveEnemies);
         t.Start();
 
         while (!isGameOver)
         {
-            Draw()  ;
+            Draw();
             Input();
             Logic();
             Thread.Sleep(70);
@@ -67,6 +78,12 @@ class Program
             }
         }
 
+        // Desenhar a arma (bala) se estiver ativa
+        if (isBulletActive)
+        {
+            screen[bulletX, bulletY] = '|';
+        }
+
         // Exibir a matriz de tela
         for (int y = 0; y < Console.WindowHeight; y++)
         {
@@ -94,15 +111,49 @@ class Program
                     if (playerX < Console.WindowWidth - 1)
                         playerX += playerSpeed;
                     break;
+                case ConsoleKey.Spacebar:
+                    if (!isBulletActive)
+                    {
+                        // Disparar a arma (ativar a bala)
+                        bulletX = playerX;
+                        bulletY = playerY - 1;
+                        isBulletActive = true;
+                    }
+                    break;
             }
         }
     }
 
     static void Logic()
     {
+        // Mover a bala se estiver ativa
+        if (isBulletActive)
+        {
+            bulletY--;
+
+            // Verificar colisão da bala com os inimigos
+            for (int i = 0; i < enemyX.Length; i++)
+            {
+                if (bulletX == enemyX[i] && bulletY == enemyY[i])
+                {
+                    // Eliminar o inimigo
+                    enemyX[i] = -1;
+                    enemyY[i] = -1;
+                    isBulletActive = false;
+                }
+            }
+
+            // Desativar a bala se atingir o topo
+            if (bulletY < 0)
+            {
+                isBulletActive = false;
+            }
+        }
+
+        // Mover os inimigos
         for (int i = 0; i < enemyX.Length; i++)
         {
-            enemyY[i]++; // Move os inimigos para baixo
+            enemyY[i]++;
 
             if (enemyY[i] >= Console.WindowHeight)
             {
